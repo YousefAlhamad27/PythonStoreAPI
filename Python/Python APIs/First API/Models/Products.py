@@ -1,11 +1,12 @@
-from beanie import Document
+from beanie import Document,PydanticObjectId
 from pydantic import Field
 from typing import List,Dict, Any
 from datetime import datetime
 
 
 class Product(Document):
-    id:str=Field(alias="_id")        
+
+    productID:str=Field(alias="id")   
     name:str
     category:str
     price:float
