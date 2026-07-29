@@ -9,11 +9,14 @@ from Models.Products import Product
 
 @asynccontextmanager
 async def lifespan(app:FastAPI):
-    await init_beanie(database=database,document_models=[Customer,Product,User])
-    print("Connecting to DB")
-    yield
-    print("Closing Connection")
-    client.close()
+     
+        await init_beanie(database=database,document_models=[Customer,Product,User])
+        print("Connecting to DB")
+   
+    
+        yield
+        print("Closing Connection")
+        client.close()
 
 app = FastAPI(lifespan=lifespan)
 
