@@ -21,14 +21,15 @@ class ProductUpdateDTO(BaseModel):
       stock:int
       attributes:Dict[str,Any]      
 
-
+#query parameter vs path variable
+#create another system id and forget about id
 @router.post("/Create-Product",status_code=status.HTTP_201_CREATED,response_model=Product)
 async def createProduct(payload: ProductCreateDTO): 
 
 
 
 
-    lastProduct=await Product.find_all().sort("-_id").first_or_none()
+    lastProduct=await Product.find_all().sort("-system_id").first_or_none()
     if lastProduct:
 
         lastNumber=int(lastProduct.id.split("-")[1])
@@ -55,6 +56,8 @@ async def createProduct(payload: ProductCreateDTO):
     
     return newProduct
 
+
+#deleteOne() or deleteMany()
 @router.delete("/Delete-Product",status_code=status.HTTP_200_OK)
 async def deleteProduct(productID:str):
       
@@ -71,6 +74,7 @@ async def deleteProduct(productID:str):
         raise HTTPException(status_code=500,detail=f"Server Issue: {str(exception)}")
 
 
+#pagination
 @router.get("/ProductsList",response_model=List[Product])
 async def GetCustomers():
     products=await Product.find_all().to_list()
@@ -107,6 +111,7 @@ class UpdateCategoryDTO(BaseModel):
     id:str
     category:str
 
+#allow one or more or all to be updated
 @router.patch("/UpdateCategory",status_code=status.HTTP_200_OK)    
 async def UpdateCategory(payload:UpdateCategoryDTO):
 
