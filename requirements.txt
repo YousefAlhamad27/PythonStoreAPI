@@ -6,3 +6,4 @@ uvicorn==0.52.0
 motor==3.7.1
 beanie==1.25.0
 pymongo==4.17.0
+python-multipart

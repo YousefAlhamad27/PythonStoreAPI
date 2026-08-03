@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import MyFirstAPI,CustomersAPI,ProductsAPI
+from routers import MyFirstAPI,CustomersAPI,ProductsAPI,AuthAPI
 from database import client,database
 from beanie import init_beanie
 from contextlib import asynccontextmanager
@@ -23,7 +23,7 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(MyFirstAPI.router)
 app.include_router(CustomersAPI.router)
 app.include_router(ProductsAPI.router)
-
+app.include_router(AuthAPI.router)
 
 # def hello():
 #     print("sup")
