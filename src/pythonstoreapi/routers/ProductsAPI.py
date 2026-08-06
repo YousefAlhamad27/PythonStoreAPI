@@ -1,34 +1,43 @@
 from fastapi import APIRouter,status,HTTPException,Depends
 from Models.Products import Product
+from Schemas.ProductsDTOs import ProductCreateDTO,ProductUpdateDTO,UpdateOptionalDTO,ProductResponse
 from typing import List,Dict, Any,Optional
 from pymongo import MongoClient
 from pydantic import BaseModel,Field
 
 router=APIRouter()
 
-class ProductCreateDTO(BaseModel):
-      name:str
-      category:str
-      price:float
-      stock:int
-      attributes:Dict[str,Any]
+# class ProductCreateDTO(BaseModel):
+#       name:str
+#       category:str
+#       price:float
+#       stock:int
+#       attributes:Dict[str,Any]
 
-class ProductResponse(BaseModel):
-    productID: str 
-    name: str
-    category: str
-    price: float
-    stock: int
-    attributes: Dict[str, Any]      
+# class ProductResponse(BaseModel):
+#     productID: str 
+#     name: str
+#     category: str
+#     price: float
+#     stock: int
+#     attributes: Dict[str, Any]      
 
+# class UpdateOptionalDTO(BaseModel):
+#     productID:str
+#     category:Optional[str]=None
+#     name: Optional[str]=None
+#     category: Optional[str]=None
+#     price: Optional[float]=None
+#     stock: Optional[int]=None
+#     attributes: Optional[Dict[str, Any]]= None
 
-class ProductUpdateDTO(BaseModel):
-      productID:str
-      name:str
-      category:str
-      price:float
-      stock:int
-      attributes:Dict[str,Any]      
+# class ProductUpdateDTO(BaseModel):
+#       productID:str
+#       name:str
+#       category:str
+#       price:float
+#       stock:int
+#       attributes:Dict[str,Any]      
 
 #query paramter vs path variable
 #create another system id and forget about _id
@@ -117,7 +126,7 @@ async def GetProducts(pageNumber:int=1, pageSize:int=10)-> List[Product]:
 async def updateProduct(payload:ProductUpdateDTO):
 
     try:
-        product=await Product.get(payload.productID)
+        product=await Product.find_one(Product.productID== payload.productID)
 
         if product ==None:
              raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Product does not exist")
@@ -136,14 +145,7 @@ async def updateProduct(payload:ProductUpdateDTO):
         raise HTTPException(status_code=500,detail=f"Server Issue: {str(exception)}")
 
 
-class UpdateOptionalDTO(BaseModel):
-    productID:str
-    category:Optional[str]=None
-    name: Optional[str]=None
-    category: Optional[str]=None
-    price: Optional[float]=None
-    stock: Optional[int]=None
-    attributes: Optional[Dict[str, Any]]= None
+
 
 #allow one or more or all to be updated
 @router.patch("/UpdateProductOptional",status_code=status.HTTP_200_OK)    
