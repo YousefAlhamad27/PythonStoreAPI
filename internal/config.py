@@ -1,0 +1,8 @@
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    TOKEN_SECRET_KEY: str
+    MONGO_CONNECTION_STRING: str
+
+settings=Settings()    

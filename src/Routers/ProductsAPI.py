@@ -1,6 +1,6 @@
 from fastapi import APIRouter,status,HTTPException,Depends
-from Models.Products import Product
-from Schemas.ProductsDTOs import ProductCreateDTO,ProductUpdateDTO,UpdateOptionalDTO,ProductResponse
+from src.Models.Products import Product
+from src.Schemas.ProductsDTOs import ProductCreateDTO,ProductUpdateDTO,UpdateOptionalDTO,ProductResponse
 from typing import List,Dict, Any,Optional
 from pymongo import MongoClient
 from pydantic import BaseModel,Field

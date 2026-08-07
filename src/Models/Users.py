@@ -5,8 +5,10 @@ from datetime import datetime
 
 
 class User(Document):
+  
     username: str
     email: str
+    password:str
     memberSince: datetime
     address:dict[str,Any]
     orders:List[Any]

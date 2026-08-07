@@ -9,5 +9,9 @@ class UserAuth(BaseModel):
     disabled: bool | None = None
 
 
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
 class UserInDB(UserAuth):
     hashed_password: str

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from fastapi import APIRouter
-from Schemas.UsersDTOs import UserAuth,UserInDB
+from src.Schemas.UsersDTOs import UserAuth,UserInDB
 
 import jwt
 from fastapi import Depends, FastAPI, HTTPException, status

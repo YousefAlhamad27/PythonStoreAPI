@@ -1,6 +1,6 @@
 
 from fastapi import APIRouter,status,HTTPException,Depends
-from Models.Customers import Customer
+from src.Models.Customers import Customer
 from typing import List,Dict, Any
 from pydantic import BaseModel
 
