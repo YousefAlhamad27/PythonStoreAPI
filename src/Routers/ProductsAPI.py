@@ -1,4 +1,4 @@
-import Util
+from src import Util
 from fastapi import APIRouter,status,HTTPException,Depends
 from src.Models.Products import Product
 from src.Auth import security
@@ -10,40 +10,6 @@ from pydantic import BaseModel,Field
 
 router=APIRouter()
 
-# class ProductCreateDTO(BaseModel):
-#       name:str
-#       category:str
-#       price:float
-#       stock:int
-#       attributes:Dict[str,Any]
-
-# class ProductResponse(BaseModel):
-#     productID: str 
-#     name: str
-#     category: str
-#     price: float
-#     stock: int
-#     attributes: Dict[str, Any]      
-
-# class UpdateOptionalDTO(BaseModel):
-#     productID:str
-#     category:Optional[str]=None
-#     name: Optional[str]=None
-#     category: Optional[str]=None
-#     price: Optional[float]=None
-#     stock: Optional[int]=None
-#     attributes: Optional[Dict[str, Any]]= None
-
-# class ProductUpdateDTO(BaseModel):
-#       productID:str
-#       name:str
-#       category:str
-#       price:float
-#       stock:int
-#       attributes:Dict[str,Any]      
-
-#query paramter vs path variable
-#create another system id and forget about _id
 @router.post("/Create-Product",status_code=status.HTTP_201_CREATED,response_model=Product)
 async def createProduct(payload: ProductCreateDTO,token:str=Depends(security.oauth2_scheme)): 
 
