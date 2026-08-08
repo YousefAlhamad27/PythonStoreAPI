@@ -1,7 +1,10 @@
+import Util
 from fastapi import APIRouter,status,HTTPException,Depends
 from src.Models.Products import Product
+from src.Auth import security
 from src.Schemas.ProductsDTOs import ProductCreateDTO,ProductUpdateDTO,UpdateOptionalDTO,ProductResponse
 from typing import List,Dict, Any,Optional
+from src.Services import ProductService
 from pymongo import MongoClient
 from pydantic import BaseModel,Field
 
@@ -42,145 +45,103 @@ router=APIRouter()
 #query paramter vs path variable
 #create another system id and forget about _id
 @router.post("/Create-Product",status_code=status.HTTP_201_CREATED,response_model=Product)
-async def createProduct(payload: ProductCreateDTO): 
+async def createProduct(payload: ProductCreateDTO,token:str=Depends(security.oauth2_scheme)): 
 
+    token=Util.verify_access_token(token)
 
+    if token is None:
+        raise HTTPException(status_code=401,detail="Invalid token")
 
-
-    lastProduct=await Product.find_all().sort("-id").first_or_none()
-    if lastProduct:
-
-        lastNumber=int(lastProduct.productID.split("-")[1])
-        nextNumber=lastNumber+1
- 
-    else:
-        nextNumber=1
-
-    newProductID=f"PROD-{nextNumber:03d}"    
-
- 
-    
-    try:
-        newProduct=Product(
-                 productID=newProductID,name=payload.name,category=payload.category,price=payload.price
-                ,stock=payload.stock,attributes=payload.attributes
-                )
-         
-        await newProduct.insert()
-
-    except Exception as exception:
-        raise HTTPException(status_code=500,detail=f"Server Issue: {str(exception)}")
 
     
-    return newProduct
+    product=await ProductService.CreateProduct(payload)
+
+    if product is None:
+        raise HTTPException(status_code=500,detail="Server Problem")
+    
+    return product
 
 @router.get("/GetProduct/{productID}",status_code=status.HTTP_200_OK)
-async def getProduct(productID:str):
+async def getProduct(productID:str,token:str=Depends(security.oauth2_scheme)):
 
-    try:
-       if productID == "":
-         raise HTTPException(status_code=400)
+    token=Util.verify_access_token(token)
+
+    if token is None:
+        raise HTTPException(status_code=401,detail="Invalid token")
+
+    
        
-       product= await Product.find_one(Product.productID==productID)
-       #product=await Product.get(productID)
-       if product == None:
-        raise HTTPException(status_code=404)
+    product=await ProductService.GetProductByID(productID)
 
-       return product      
+    if product is None:
+        raise HTTPException(status_code=404,detail="Product not found")
+    return product   
+       
 
-    except Exception as e:
-         raise HTTPException(status_code=500,detail=f"Server Issue: {str(e)}")
+ 
         
 
 #deleteOne() or deleteMany()
 @router.delete("/Delete-Product/{productID}",status_code=status.HTTP_200_OK)
-async def deleteProduct(productID:str):
-      
+async def deleteProduct(productID:str,token:str=Depends(security.oauth2_scheme)):
+
+     token=Util.verify_access_token(token)
      
+     if token is None:
+             raise HTTPException(status_code=401,detail="Invalid token")
+     
+     deleted=await ProductService.DeleteProduct(productID)
+
+     if deleted==False:
+            raise HTTPException(status_code=500,detail="Server Problem")
+     return {"message":"Product Deleted successfully!"}
   
-     try:
-         
-        
-           
-        await Product.find_one(Product.productID==productID).delete()
-
-        return {"message":f"Product {productID} delete successfully!"}
-     except Exception as exception:
-        raise HTTPException(status_code=500,detail=f"Server Issue: {str(exception)}")
-
+    
 #pagination
 @router.get("/ProductsList",response_model=List[Product])
-async def GetProducts(pageNumber:int=1, pageSize:int=10)-> List[Product]:
+async def GetProducts(pageNumber:int=1, pageSize:int=10,token:str=Depends(security.oauth2_scheme))-> List[Product]:
 
-    skipCount=(pageNumber-1)*pageSize
+    token=Util.verify_access_token(token)
 
-    products=await Product.find_all().skip(skipCount).limit(pageSize).to_list()
-    
-    if products ==None :
-        raise HTTPException(status_code=500,detail="Server Problem")
+    if token is None:
+        raise HTTPException(status_code=401,detail="Invalid token")
+
+    products=await ProductService.GetProducts(pageNumber,pageSize)
+    if products is None:
+        raise HTTPException(status_code=404,detail="No products found")
 
     return products
 
 @router.put("/UpdateProduct",status_code=status.HTTP_200_OK)
 
-async def updateProduct(payload:ProductUpdateDTO):
+async def updateProduct(payload:ProductUpdateDTO,token:str=Depends(security.oauth2_scheme)):
 
-    try:
-        product=await Product.find_one(Product.productID== payload.productID)
+    token=Util.verify_access_token(token)
 
-        if product ==None:
-             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Product does not exist")
-        
-        product.name=payload.name
-        product.attributes=payload.attributes
-        product.stock=payload.stock
-        product.price=payload.price
-        product.category=payload.category
+    if token is None:
+        raise HTTPException(status_code=401,detail="Invalid token")
 
-        #await product.update()
-        await product.save()
-
-        return {"message":"Product Updated successfully!"}
-    except Exception as exception:
-        raise HTTPException(status_code=500,detail=f"Server Issue: {str(exception)}")
-
+    saved=await ProductService.UpdateProduct(payload)
+    
+    if saved ==False:
+            raise HTTPException(status_code=500,detail="Server Problem")
+    return {"message":"Product Updated successfully!"}
+    
 
 
 
 #allow one or more or all to be updated
 @router.patch("/UpdateProductOptional",status_code=status.HTTP_200_OK)    
-async def UpdateCategory(payload:UpdateOptionalDTO):
+async def UpdateCategory(payload:UpdateOptionalDTO,token:str=Depends(security.oauth2_scheme)):
 
-    try:
-        product =await Product.find_one(Product.productID==payload.productID)
+    token=Util.verify_access_token(token)
 
-        if product==None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Product does not exist")
+    if token is None:
+        raise HTTPException(status_code=401,detail="Invalid token")
 
-        # updateData= payload.model_dump(exclude_unset=True)
+    saved=await ProductService.UpdateProductOptional(payload)
 
-        # updateData.pop("ProductID",None)
+    if saved ==False:
+        raise HTTPException(status_code=500,detail="Server Problem")
 
-        # for key,value in updateData.items():
-        #      setattr(product,key,value)
-
-
-        if payload.category!=None and payload.category!="":
-           product.category=payload.category
-
-        if payload.name!=None and payload.name!="":
-                   product.name=payload.name
-
-        if  payload.attributes!=None:
-                    product.attributes=payload.attributes
-
-        if payload.price!=None and payload.price!=0:
-                   product.price=payload.price
-
-        if payload.stock!=None:
-                   product.stock=payload.stock   
-
-        await product.save()
-        return {"message":"Category Updated successfully!"}
-    except Exception as exception:
-        raise HTTPException(status_code=500,detail=f"Server Issue: {str(exception)}")  
+    return {"message":"Product Updated successfully!"}  

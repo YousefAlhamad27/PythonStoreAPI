@@ -1,13 +1,13 @@
-from Auth import security
+from src.Auth import security
 from fastapi import APIRouter,status,HTTPException,Depends
-from Schemas.UsersDTOs import UserLogin
+from src.Schemas.UsersDTOs import UserLogin
 # from src.Models.Customers import Customer
 from typing import Annotated, List,Dict, Any
 
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
-import Util
+from src import Util
 from src.Services import UserService
 
 router=APIRouter()
