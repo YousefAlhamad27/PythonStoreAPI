@@ -56,8 +56,7 @@ async def lifespan(app:FastAPI):
           await default_user.insert()
           print("Default user seeded successfully!")
         else:
-         users=await User.find_all().to_list()
-         await User.delete_all(users)
+        
          print(f"Database already contains {existing_users_count} users. Skipping seed.")
         yield
         print("Closing Connection")
