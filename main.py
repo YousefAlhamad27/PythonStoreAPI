@@ -56,9 +56,37 @@ async def lifespan(app:FastAPI):
           await default_user.insert()
           print("Default user seeded successfully!")
         else:
-         users=await User.find_all().to_list()
-         await User.delete_all(users)
+         
          print(f"Database already contains {existing_users_count} users. Skipping seed.")
+
+
+         # Check if the Customers collection is empty
+        existing_customers_count = await Customer.find_all().count()
+        
+        if existing_customers_count == 0:
+            print("Customers collection is empty. Seeding default customers...")
+            
+            default_customers = [
+                Customer(username="alice99", status="Active", age=28, score=85),
+                Customer(username="bob_builder", status="Inactive", age=34, score=42),
+                Customer(username="charlie_c", status="Active", age=45, score=91),
+                Customer(username="diana_prince", status="Active", age=22, score=99),
+                Customer(username="evan_m", status="Pending", age=31, score=12),
+                Customer(username="fiona_s", status="Active", age=29, score=77),
+                Customer(username="george_j", status="Inactive", age=52, score=38),
+                Customer(username="hannah_m", status="Active", age=26, score=88),
+                Customer(username="ian_wright", status="Active", age=38, score=95),
+                Customer(username="jack_k", status="Pending", age=41, score=55),
+                Customer(username="karen_l", status="Inactive", age=48, score=62),
+                Customer(username="leo_t", status="Active", age=33, score=81)
+            ]
+            
+            # Using insert_many is highly efficient for bulk data
+            await Customer.insert_many(default_customers)
+            print("Default customers seeded successfully!")
+        else:
+            print(f"Database already contains {existing_customers_count} customers. Skipping seed.")
+            
         yield
         print("Closing Connection")
         client.close()

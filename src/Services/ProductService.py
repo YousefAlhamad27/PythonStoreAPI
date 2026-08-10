@@ -9,20 +9,22 @@ from pydantic import BaseModel
 
 async def CreateProduct(payload: ProductCreateDTO)->Product:
 
-        lastProduct=await Product.find_all().sort("-id").first_or_none()
-        if lastProduct:
-    
-            lastNumber=int(lastProduct.productID.split("-")[1])
-            nextNumber=lastNumber+1
-     
-        else:
-            nextNumber=1
-    
-        newProductID=f"PROD-{nextNumber:03d}"    
+         
     
      
         
         try:
+            lastProduct=await Product.find_all().sort("-id").first_or_none()
+            if lastProduct:
+            
+                    lastNumber=int(lastProduct.productID.split("-")[1])
+                    nextNumber=lastNumber+1
+             
+            else:
+                    nextNumber=1
+            
+            newProductID=f"PROD-{nextNumber:03d}"      
+            
             newProduct=Product(
                      productID=newProductID,name=payload.name,category=payload.category,price=payload.price
                     ,stock=payload.stock,attributes=payload.attributes
@@ -34,6 +36,7 @@ async def CreateProduct(payload: ProductCreateDTO)->Product:
             raise HTTPException(status_code=500,detail=f"Server Issue: {str(exception)}")
 
         return newProduct
+
 async def DeleteProduct(productID:str)->bool:
       
     try:
@@ -53,9 +56,14 @@ async def GetProducts(pageNumber:int=1, pageSize:int=10)-> List[Product]:
 
     skipCount=(pageNumber-1)*pageSize
 
-    products=await Product.find_all().skip(skipCount).limit(pageSize).to_list()
-
-    return products
+    try:
+         products=await Product.find_all().skip(skipCount).limit(pageSize).to_list()
+         return products   
+    
+    except Exception as exception:
+            raise HTTPException(status_code=500,detail=f"Server Issue: {str(exception)}")
+         
+    
 
 async def UpdateProduct(payload:ProductUpdateDTO)->Product:
 
