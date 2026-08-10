@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-
 from fastapi import FastAPI
 from src.Routers import MyFirstAPI, CustomersAPI, ProductsAPI, AuthAPI, RealAuthAPI,UserAPI
 from src.Database.database import client, database
@@ -56,7 +55,7 @@ async def lifespan(app:FastAPI):
           await default_user.insert()
           print("Default user seeded successfully!")
         else:
-         
+
          print(f"Database already contains {existing_users_count} users. Skipping seed.")
 
 
@@ -86,7 +85,7 @@ async def lifespan(app:FastAPI):
             print("Default customers seeded successfully!")
         else:
             print(f"Database already contains {existing_customers_count} customers. Skipping seed.")
-            
+
         yield
         print("Closing Connection")
         client.close()
@@ -99,8 +98,4 @@ app.include_router(ProductsAPI.router)
 app.include_router(UserAPI.router)
 # app.include_router(AuthAPI.router)
 app.include_router(RealAuthAPI.router)  
-# def hello():
-#     print("sup")
-
-# hello()    
  
