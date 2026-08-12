@@ -82,7 +82,7 @@ async def updateProduct(payload:ProductUpdateDTO, current_user:Annotated[User,De
 
 #allow one or more or all to be updated
 @router.patch("/UpdateProductOptional",status_code=status.HTTP_200_OK)    
-async def UpdateCategory(payload:UpdateOptionalDTO, current_user: dict = Depends(security.get_current_user)):
+async def UpdateCategory(payload:UpdateOptionalDTO, current_user:Annotated[User,Depends(security.get_current_user)]):
 
    
 
