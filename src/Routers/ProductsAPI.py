@@ -97,7 +97,7 @@ async def updateProduct(payload:ProductUpdateDTO,token:str=Depends(security.oaut
 
 
 #allow one or more or all to be updated
-@router.patch("/UpdateProductOptional",status_code=status.HTTP_200_OK)    
+@router.patch("/UpdateProductOptional",status_code=status.HTTP_200_OK,dependencies=[Depends(Util.get_current)])    
 async def UpdateCategory(payload:UpdateOptionalDTO,token:str=Depends(security.oauth2_scheme)):
 
     token=Util.verify_access_token(token)
