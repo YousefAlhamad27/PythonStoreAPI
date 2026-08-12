@@ -1,9 +1,11 @@
+from Models.Users import User
+
 from src import Util
 from fastapi import APIRouter,status,HTTPException,Depends
 from src.Models.Products import Product
 from src.Auth import security
 from src.Schemas.ProductsDTOs import ProductCreateDTO,ProductUpdateDTO,UpdateOptionalDTO,ProductResponse
-from typing import List,Dict, Any,Optional
+from typing import Annotated, List,Dict, Any,Optional
 from src.Services import ProductService
 from pymongo import MongoClient
 from pydantic import BaseModel,Field
@@ -11,12 +13,8 @@ from pydantic import BaseModel,Field
 router=APIRouter()
 
 @router.post("/Create-Product",status_code=status.HTTP_201_CREATED,response_model=Product)
-async def createProduct(payload: ProductCreateDTO,token:str=Depends(security.oauth2_scheme)): 
-
-    token=Util.verify_access_token(token)
-
-    if token is None:
-        raise HTTPException(status_code=401,detail="Invalid token")
+async def createProduct(payload: ProductCreateDTO,current_user:Annotated[User,Depends(security.get_current_user)]): 
+    
 
 
     
@@ -28,12 +26,9 @@ async def createProduct(payload: ProductCreateDTO,token:str=Depends(security.oau
     return product
 
 @router.get("/GetProduct/{productID}",status_code=status.HTTP_200_OK)
-async def getProduct(productID:str,token:str=Depends(security.oauth2_scheme)):
+async def getProduct(productID:str,current_user:Annotated[User,Depends(security.get_current_user)]):
 
-    token=Util.verify_access_token(token)
-
-    if token is None:
-        raise HTTPException(status_code=401,detail="Invalid token")
+    
 
     
        
@@ -49,12 +44,9 @@ async def getProduct(productID:str,token:str=Depends(security.oauth2_scheme)):
 
 #deleteOne() or deleteMany()
 @router.delete("/Delete-Product/{productID}",status_code=status.HTTP_200_OK)
-async def deleteProduct(productID:str,token:str=Depends(security.oauth2_scheme)):
+async def deleteProduct(productID:str, current_user: dict = Depends(security.get_current_user)):
 
-     token=Util.verify_access_token(token)
      
-     if token is None:
-             raise HTTPException(status_code=401,detail="Invalid token")
      
      deleted=await ProductService.DeleteProduct(productID)
 
@@ -65,12 +57,7 @@ async def deleteProduct(productID:str,token:str=Depends(security.oauth2_scheme))
     
 #pagination
 @router.get("/ProductsList",response_model=List[Product])
-async def GetProducts(pageNumber:int=1, pageSize:int=10,token:str=Depends(security.oauth2_scheme))-> List[Product]:
-
-    token=Util.verify_access_token(token)
-
-    if token is None:
-        raise HTTPException(status_code=401,detail="Invalid token")
+async def GetProducts(current_user:Annotated[User,Depends(security.get_current_user)],pageNumber:int=1, pageSize:int=10)-> List[Product]:
 
     products=await ProductService.GetProducts(pageNumber,pageSize)
     if products is None:
@@ -80,12 +67,9 @@ async def GetProducts(pageNumber:int=1, pageSize:int=10,token:str=Depends(securi
 
 @router.put("/UpdateProduct",status_code=status.HTTP_200_OK)
 
-async def updateProduct(payload:ProductUpdateDTO,token:str=Depends(security.oauth2_scheme)):
+async def updateProduct(payload:ProductUpdateDTO, current_user:Annotated[User,Depends(security.get_current_user)]):
 
-    token=Util.verify_access_token(token)
-
-    if token is None:
-        raise HTTPException(status_code=401,detail="Invalid token")
+    
 
     saved=await ProductService.UpdateProduct(payload)
     
@@ -97,13 +81,10 @@ async def updateProduct(payload:ProductUpdateDTO,token:str=Depends(security.oaut
 
 
 #allow one or more or all to be updated
-@router.patch("/UpdateProductOptional",status_code=status.HTTP_200_OK,dependencies=[Depends(Util.get_current)])    
-async def UpdateCategory(payload:UpdateOptionalDTO,token:str=Depends(security.oauth2_scheme)):
+@router.patch("/UpdateProductOptional",status_code=status.HTTP_200_OK)    
+async def UpdateCategory(payload:UpdateOptionalDTO, current_user:Annotated[User,Depends(security.get_current_user)]):
 
-    token=Util.verify_access_token(token)
-
-    if token is None:
-        raise HTTPException(status_code=401,detail="Invalid token")
+   
 
     saved=await ProductService.UpdateProductOptional(payload)
 

@@ -1,3 +1,5 @@
+from Models.Users import User
+
 from src.Auth import security
 from fastapi import APIRouter,status,HTTPException,Depends
 from src.Schemas.UsersDTOs import UserLogin
@@ -36,15 +38,26 @@ async def login(payload:Annotated[OAuth2PasswordRequestForm, Depends()]):
 
 @router.get("/UserAPI/me",status_code=status.HTTP_200_OK)
 
-async def getCurrentUser(token:str=Depends(security.oauth2_scheme)):
+async def getCurrentUser(current_user:Annotated[User,Depends(security.get_current_user)]):
 
-    payload=Util.verify_access_token(token)
+     
 
-    if payload is None:
-        raise HTTPException(status_code=401,detail="Invalid token")
+    
 
-    userId=payload.get("sub")
-    user=await UserService.FindUserByID(userId)
+    if current_user is None:
+        raise HTTPException(status_code=404,detail="User not found")
+
+    
+
+    return current_user
+
+@router.get("/UserAPI/GetUser",status_code=status.HTTP_200_OK)
+
+async def getCurrentUser(username:str,current_user:Annotated[User,Depends(security.get_current_user)]):
+
+     
+    user=await UserService.FindUserByUsername(username)
+    
 
     if user is None:
         raise HTTPException(status_code=404,detail="User not found")
