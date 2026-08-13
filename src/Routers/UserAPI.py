@@ -1,4 +1,4 @@
-from Models.Users import User
+from src.Models.Users import User
 
 from src.Auth import security
 from fastapi import APIRouter,status,HTTPException,Depends
